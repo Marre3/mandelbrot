@@ -25,13 +25,33 @@ void drawPixel(SDL_Renderer *renderer, int x, int y) {
     SDL_RenderDrawPoint(renderer, x, y);
 }
 
+void draw(SDL_Renderer *renderer) {
+    SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
+    SDL_RenderClear(renderer);
+
+    for (auto i : std::views::iota(0, 600)) {
+        for (auto j : std::views::iota(0, 400)) {
+            drawPixel(renderer, i, j);
+        }
+    }
+
+    SDL_RenderPresent(renderer);
+}
+
 int main(void) {
     if (SDL_Init(SDL_INIT_VIDEO) != 0) {
         std::cerr << "SDL_Init Error: " << SDL_GetError() << std::endl;
         return 1;
     }
 
-    SDL_Window* window = SDL_CreateWindow("Hello World", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, 640, 480, SDL_WINDOW_SHOWN);
+    SDL_Window* window = SDL_CreateWindow(
+        "Hello World",
+        SDL_WINDOWPOS_UNDEFINED,
+        SDL_WINDOWPOS_UNDEFINED,
+        640,
+        480,
+        SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE
+    );
     if (window == nullptr) {
         std::cerr << "SDL_CreateWindow Error: " << SDL_GetError() << std::endl;
         SDL_Quit();
@@ -46,24 +66,23 @@ int main(void) {
         return 1;
     }
 
-    SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
-    SDL_RenderClear(renderer);
+    draw(renderer);
 
-    for (auto i : std::views::iota(0, 600)) {
-        for (auto j : std::views::iota(0, 400)) {
-            drawPixel(renderer, i, j);
-        }
-    }
-
-    SDL_RenderPresent(renderer);
-
-    // Wait for the user to close the window
     SDL_Event e;
     bool quit = false;
     while (!quit) {
         while (SDL_PollEvent(&e)) {
-            if (e.type == SDL_QUIT) {
-                quit = true;
+            switch (e.type) {
+                case SDL_QUIT: {
+                    quit = true;
+                    break;
+                }
+                case SDL_WINDOWEVENT: {
+                    if (e.window.event == SDL_WINDOWEVENT_RESIZED) {
+                        draw(renderer);
+                    }
+                    break;
+                }
             }
         }
     }
