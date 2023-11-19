@@ -2,8 +2,8 @@
 #include <ranges>
 #include <SDL.h>
 
-int helper(double x, double y, double cx, double cy, int acc) {
-    if (acc > 100) {
+static int helper(double x, double y, double cx, double cy, int acc) {
+    if (acc > 99) {
         return acc;
     } else if (x*x > 4 || y*y > 4) {
         return acc;
@@ -12,26 +12,26 @@ int helper(double x, double y, double cx, double cy, int acc) {
     }
 }
 
-int mandelbrot(double x, double y) {
+static int mandelbrot(double x, double y) {
     return helper(x, y, x, y, 0);
 }
 
-void drawPixel(SDL_Renderer *renderer, int x, int y) {
-    double coordX, coordY;
-    coordX = (x - 300.0) / 150;
-    coordY = (200.0 - y) / 150;
-    auto value = mandelbrot(coordX, coordY);
+static void drawPixel(SDL_Renderer *renderer, int x, int y, double scale, double originX, double originY) {
+    auto value = mandelbrot(
+        x * scale + originX,
+        y * scale + originY
+    );
     SDL_SetRenderDrawColor(renderer, value*2.55, value*2.55, 0, 255);
     SDL_RenderDrawPoint(renderer, x, y);
 }
 
-void draw(SDL_Renderer *renderer) {
+static void draw(SDL_Renderer *renderer, int width, int height, double scale, double originX, double originY) {
     SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
     SDL_RenderClear(renderer);
 
-    for (auto i : std::views::iota(0, 600)) {
-        for (auto j : std::views::iota(0, 400)) {
-            drawPixel(renderer, i, j);
+    for (auto i : std::views::iota(0, width)) {
+        for (auto j : std::views::iota(0, height)) {
+            drawPixel(renderer, i, j, scale, originX, originY);
         }
     }
 
@@ -39,6 +39,13 @@ void draw(SDL_Renderer *renderer) {
 }
 
 int main(void) {
+    int width = 640;
+    int height = 480;
+    double viewHeight = 3.0;
+    double originX = -2.5;
+    double originY = -viewHeight / 2;
+    double scale = viewHeight / height;
+
     if (SDL_Init(SDL_INIT_VIDEO) != 0) {
         std::cerr << "SDL_Init Error: " << SDL_GetError() << std::endl;
         return 1;
@@ -48,8 +55,8 @@ int main(void) {
         "Hello World",
         SDL_WINDOWPOS_UNDEFINED,
         SDL_WINDOWPOS_UNDEFINED,
-        640,
-        480,
+        width,
+        height,
         SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE
     );
     if (window == nullptr) {
@@ -66,7 +73,7 @@ int main(void) {
         return 1;
     }
 
-    draw(renderer);
+    draw(renderer, width, height, scale, originX, originY);
 
     SDL_Event e;
     bool quit = false;
@@ -79,7 +86,10 @@ int main(void) {
                 }
                 case SDL_WINDOWEVENT: {
                     if (e.window.event == SDL_WINDOWEVENT_RESIZED) {
-                        draw(renderer);
+                        width = e.window.data1;
+                        height = e.window.data2;
+                        scale = viewHeight / height;
+                        draw(renderer, width, height, scale, originX, originY);
                     }
                     break;
                 }
