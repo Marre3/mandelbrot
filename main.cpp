@@ -73,11 +73,15 @@ int main(void) {
         return 1;
     }
 
-    draw(renderer, width, height, scale, originX, originY);
 
     SDL_Event e;
     bool quit = false;
+    bool redraw = true;
     while (!quit) {
+        if (redraw) {
+            draw(renderer, width, height, scale, originX, originY);
+            redraw = false;
+        }
         while (SDL_PollEvent(&e)) {
             switch (e.type) {
                 case SDL_QUIT: {
@@ -89,9 +93,25 @@ int main(void) {
                         width = e.window.data1;
                         height = e.window.data2;
                         scale = viewHeight / height;
-                        draw(renderer, width, height, scale, originX, originY);
+                        redraw = true;
                     }
                     break;
+                }
+                case SDL_KEYDOWN: {
+                    switch (e.key.keysym.sym) {
+                        case SDLK_PLUS: {
+                            viewHeight /= 1.1;
+                            scale = viewHeight / height;
+                            redraw = true;
+                            break;
+                        }
+                        case SDLK_MINUS: {
+                            viewHeight *= 1.1;
+                            scale = viewHeight / height;
+                            redraw = true;
+                            break;
+                        }
+                    }
                 }
             }
         }
