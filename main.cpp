@@ -102,10 +102,14 @@ int main(void) {
                         case SDLK_PLUS: {
                             viewHeight /= 1.1;
                             scale = viewHeight / height;
+                            originY += viewHeight / 20;
+                            originX += scale * width / 20;
                             redraw = true;
                             break;
                         }
                         case SDLK_MINUS: {
+                            originY -= viewHeight / 20;
+                            originX -= scale * width / 20;
                             viewHeight *= 1.1;
                             scale = viewHeight / height;
                             redraw = true;
