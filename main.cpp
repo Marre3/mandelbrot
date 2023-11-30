@@ -111,6 +111,26 @@ int main(void) {
                             redraw = true;
                             break;
                         }
+                        case SDLK_LEFT: {
+                            originX -= viewHeight / 10;
+                            redraw = true;
+                            break;
+                        }
+                        case SDLK_RIGHT: {
+                            originX += viewHeight / 10;
+                            redraw = true;
+                            break;
+                        }
+                        case SDLK_UP: {
+                            originY -= viewHeight / 10;
+                            redraw = true;
+                            break;
+                        }
+                        case SDLK_DOWN: {
+                            originY += viewHeight / 10;
+                            redraw = true;
+                            break;
+                        }
                     }
                 }
             }
