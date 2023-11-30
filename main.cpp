@@ -52,7 +52,7 @@ int main(void) {
     }
 
     SDL_Window* window = SDL_CreateWindow(
-        "Hello World",
+        "Mandelbrot",
         SDL_WINDOWPOS_UNDEFINED,
         SDL_WINDOWPOS_UNDEFINED,
         width,
